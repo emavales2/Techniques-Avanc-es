@@ -1,0 +1,358 @@
+I NEED TO REDO EVERYTHING, SO HERE IS WHAT I HAD FOR:
+
+--------------------------------- SERVER.JS ---------------------------------
+
+
+// CONSOLIDATING REST + SPA
+
+const express = require('express');
+const app = express();
+const config = require('./config');
+const port = config.PORT;
+const path = require('path');
+
+const fs = require('fs');
+const request = require('request');
+const api_key = config.API_KEY;
+
+
+// ------ * ROUTES SPA * ------
+
+// Gère les routes que ne doivent pas pointer vers le index.html
+app.use('/static', express.static(path.resolve(__dirname, 'public', 'static')));
+
+// Gère les routes que doivent pointer vers le index.html
+app.get('/*', (req, res) => {
+    res.sendFile(path.resolve(__dirname,'public', 'index.html'));
+});
+
+
+
+// ------------------ LO QUE TENIA -------------------
+
+
+
+// app.get('/park/:pkName', function (req, res) {
+
+app.get('/park/:pkName', function (req, res) {
+
+    const pkName = req.params.pkName;
+
+//  THIS WOULD GIVE ME ALL THE PARKS ON THE API W/ALL THEIR DATA
+    // const url = `https://developer.nps.gov/api/v1/parks?api_key=${api_key}`;
+
+    const url = `https://developer.nps.gov/api/v1/parks?parkCode=${pkName}&api_key=${api_key}`;
+    
+    console.log('API Request URL:', url);
+
+    request.get({
+        url: url,
+        json: true,
+        headers: {
+            'User-Agent': 'request',
+            'X-Api-Key': api_key
+        },
+        
+    }, (err, response, data) => {
+        console.log('Response:', response);
+        
+        if (err) {
+            console.log('Error fetching park data', err);
+            // res.status(500).send('Internal Server Error');
+        
+        // } else if (response.statusCode !== 200) {
+        //     console.log('Status:', response.statusCode);
+            // res.status(response.statusCode).send('Failed to fetch data');
+        
+        } else {
+            console.log('Content-Type:', response.headers['content-type']);
+            console.log('Data:', data);
+            // console.log(data);
+
+            // Set Content-Type in the response
+            res.setHeader('Content-Type', 'application/json');
+
+            // TO MAKE SURE DATA IS PARSED
+            // try {
+            //     const jsonData = JSON.parse(data);
+            //     console.log('Parsed Data:', jsonData);
+            //     res.setHeader('Content-Type', 'application/json');
+            //     res.send(jsonData);
+
+            // } catch (parseError) {
+            //     console.log('JSON Parse Error:', parseError);
+            //     res.status(500).send('Error parsing JSON');
+            // }
+            // END OF PARSING SAFEGUARD
+
+            // data is successfully parsed as a JSON object:
+            const newData = JSON.stringify(data);
+
+            fs.writeFile(`${pkCode}.json`, newData, (err) => {
+                if (err) {
+                    console.log('File write error', err);
+                    return res.status(500).send('Internal Server Error');
+               
+                } else {
+                    console.log('File write success');
+                    // res.send(data); // Send the data back to the client
+                    return res.send('Success');
+                }
+            });
+        }
+    });
+});
+
+
+
+
+
+
+// app.get('/pkCode-result=:pkCode', function (req, res) {
+//     const pkCode = req.params.pkCode
+//     const filePath =  `${__dirname}/${pkCode}.json`
+
+//     fs.readFile(filePath, 'utf8', function (err, data) {
+//         if (err) {
+//             console.log('Bleugh! File write error', err)
+//             res.statusCode(500).send('Internal Server Error')
+//         } else {
+//             res.send(JSON.parse(data))
+//         }
+//     })
+// })
+
+
+app.listen(port || 5000, () => {
+    
+    if (err) {
+        console.error('Error starting server:', err);
+    
+    } else {
+        console.log('TP_1 Server running properly on port : ', port);
+    }
+});
+// 
+
+
+--------------------------------- END OF SERVER.JS ---------------------------------
+
+
+--------------------------------- static/js/INDEX.JS ---------------------------------
+
+
+//4
+import AlphaView from "./views/AlphaView.js"
+import ByState from "./views/ByState.js"
+import ParkView from "./views/ParkView.js"
+import Home from "./views/Home.js"
+
+
+//5
+// Esto nos sirve pa saber si la ruta existe. Compara la ruta pescada en const routes despues del //5.1 pa ver si existe
+const pathToRegex = path => new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$")
+
+//6
+const getParams = match => {
+    const values = match.isMatch.slice(1);
+    const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(isMatch => isMatch[1])
+
+    return Object.fromEntries(keys.map((key, i) => {
+        return [key, values[i]]
+    }))
+}
+
+//1
+const router = async () => {
+
+    //5.1
+    const routes = [
+        { path: "/", view: Home},
+        { path: "/alphaview", view: AlphaView},
+        { path: "/bystate", view: ByState},
+        { path: "/park-view/:id", view: ParkView},
+    ]
+   
+    //1.2 match function
+   const potentialMatches = routes.map(route => {
+    return {
+        route: route,
+        isMatch: location.pathname.match(pathToRegex(route.path))
+    }
+   })
+
+   //console.log(potentialMatches)
+   //1.3
+   let match = potentialMatches.find(potentialMatch => potentialMatch.isMatch)
+
+   if(!match) {
+    match = {
+        route: routes[0],
+        isMatch: [location.pathname]
+    }
+   }    
+  //console.log(match.route.view())
+
+  //1.4
+  //document.querySelector("#app").innerHTML = match.route.view
+
+  //1.5
+  const view = new match.route.view(getParams(match))
+
+  document.querySelector("#app").innerHTML = await view.getHtml()
+}
+
+//3
+const navigateTo = url => {
+    history.pushState(null, null, url)
+    router()
+}
+
+//7
+// Va a cambiar la pag cuando l,addresse change aunque no haya requete http
+window.addEventListener("popstate", router)
+
+
+//2
+document.addEventListener("DOMContentLoaded", () => {
+    document.body.addEventListener('click', e => {
+        if(e.target.matches("[data-link]")){
+            e.preventDefault()
+            navigateTo(e.target.href)
+        }
+    }) 
+    router();
+});
+
+
+
+// document.addEventListener('DOMContentLoaded', () => {
+//     const parkName = "Yellowstone"; // Replace with your park name or obtain dynamically
+    
+//     fetch(`/park/${parkName}`)
+//         .then(response => response.json())
+//         .then(data => {
+//             console.log(data); // Handle the API response
+//         })
+//         .catch(error => {
+//             console.error('Error fetching data:', error);
+//         });
+// });
+
+--------------------------------- END OF static/js/INDEX.JS ---------------------------------
+
+words to filter out:
+topic: birthplace
+activities: guided tours
+
+
+or possibly filter by:
+activities : hiking
+
+
+
+
+
+--------------------------------- SERVER.JS ---------------------------------
+
+
+/ ------------------ * * ROUTE POUR OBTENIR DONNÉS * * ------------------
+
+// ---- * Route + filtre pour obtenir liste de parks avec designation "National Park" * ---- 
+
+// app.get('/getNationalParks', (req, res) => {
+//     // const api_url = `https://developer.nps.gov/api/v1/parks?designation=National%20Park&api_key=api_key=${api_key}`;
+//     const api_url = `https://developer.nps.gov/api/v1/parks?api_key=api_key=${api_key}`;
+  
+//     request.get({
+//         url: api_url,
+//         json: true,
+//         headers: {
+//             'User-Agent': 'request',
+//             'X-Api-Key': api_key,
+//         },
+
+//     }, (err, response, data) => {
+//         if (err) {
+//             console.error('Error fetching data', err);
+        
+//         } else {
+//             // ---- *Si les données sont obtenues ...
+//             //  ... Fonction pour obtenir liste de parks avec designation "National Park" (there are other kinds of parks on the list) * ----
+//             // const nationalParks = data.data.filter(park => park.designation === 'National Park');
+
+//             // const natureParks = data.data.filter(park => {
+//             //     // Check if "guided tours" is not present and "hiking" is present in activities
+//             //     const activities = park.activities.map(activity => activity.name.toLowerCase());
+//             //     return !activities.includes('guided tours') && activities.includes('Hiking');
+//             // });
+
+//             res.setHeader('Content-Type', 'application/json');
+//             // res.status(200).json(nationalParks);
+//             res.status(200).json(data.data);
+//             // res.status(200).json(natureParks);
+    
+//             // Log the list of "National Parks"
+//             // console.log('List of National Parks:', nationalParks);
+//             console.log('List of National Parks:', data.data);
+//             // console.log('List of National Parks:', natureParks);
+
+//             // Send the filtered list back to the client if needed
+//             // res.json(nationalParks);
+//         }
+//     });
+
+// });
+
+
+// ---------------------- W/LIMIT ------------------------------------------
+
+/ ------------------ * * ROUTE POUR OBTENIR DONNÉS * * ------------------
+
+// ---- * Route + filtre pour obtenir liste de parks avec designation "National Park" * ---- 
+
+
+// const max_results = 100; // Set a maximum number of parks to fetch (adjust as needed)
+
+// app.get('/getNationalParks', async (req, res) => {
+    
+//     let allParks = [];
+
+//     // Recursive function to fetch parks with pagination
+//     const fetchParks = (page = 1) => {
+//         const api_url = `https://developer.nps.gov/api/v1/parks?&api_key=${api_key}&limit=${max_results}`;
+
+//         request.get({
+//             url: api_url,
+//             json: true,
+//             headers: {
+//                 'User-Agent': 'request',
+//                 'X-Api-Key': api_key,
+//             },
+//         }, (err, response, data) => {
+//             if (err) {
+//                 console.error('Error fetching data', err);
+//                 res.status(500).send('Error fetching data');
+//             } else {
+//                 // Concatenate parks from this page to the previous ones
+//                 allParks = allParks.concat(data.data);
+
+//                 // If there are more pages, recursively fetch them
+//                 if (data.total > (page * max_results)) {
+//                     fetchParks(page + 1);
+//                 } else {
+
+//                     res.setHeader('Content-Type', 'application/json');
+//                     res.status(200).json(allParks);
+
+//                     // Log the list of "National Parks"
+//                     console.log('List of National Parks:', allParks);
+//                 }
+//             }
+//         });
+//     };
+
+
+//     // Start fetching parks with the first page
+//     fetchParks();
+// });

@@ -1,0 +1,209 @@
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 100px;
+    background: #003131;
+}
+
+main {
+    display: flex;
+    max-width: 100%;
+    justify-content: center;
+    flex-direction: column;
+}
+
+h1 {
+    font-size: 4rem;
+    color: #eed4b0;
+    margin-block-end: .1em;
+}
+
+h2 {
+    font-size: 2rem;
+    margin-block-start: .1em;
+    color: #c98447;
+}
+
+h4 {
+    color: #eed4b0;
+    font-weight: normal;
+    text-align: justify;
+}
+
+.sub_t {
+    font-style: italic;
+}
+
+/* .container {
+    display: flex;
+    flex-direction: column;
+} */
+
+h1, h2, h3, p {
+    text-align: center;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 400px;
+    border: 1px solid;
+    padding: 60px;
+    margin: auto;
+    margin-top: 60px;
+}
+
+input {
+    /* min-height: 30px; */
+    padding: 10px;
+}
+
+.user_input {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin: 40px;
+}
+
+button {
+    padding: 10px;
+    border-radius: 0;
+    border: 2px solid #eed4b0;
+    background: transparent;
+    /* margin: 40px; */
+}
+
+button:hover {
+    cursor: pointer;
+    background: #edd4b0;
+}
+
+button a {
+    color: #eed4b0;
+    text-transform: uppercase;
+}
+
+button:hover a {
+    color: #003131;  
+    font-weight: bold; 
+    letter-spacing: 1px;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* ul {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 50%;
+    flex-wrap: wrap;
+} */
+
+.two_col {
+    /* columns: 2;
+    gap: 20px; */
+    display: flex;
+    /* flex-direction: column; */
+    gap: 10px;
+    padding: 40px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.col_cont {
+    width: 45%;
+}
+
+li {
+    list-style: none;
+    color: #c98447;
+}
+
+li:hover {
+    cursor: pointer;
+    color: #eed4b0;
+}
+
+section {
+    position: relative;
+    text-align: center;
+}
+
+picture {
+    max-width: 1000px;
+    height: 600px;
+    background: #895629;
+    display: block;
+    overflow: hidden;
+    margin-left: auto;
+    margin-right: auto;
+    margin: 60px auto;
+}
+
+picture img {
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    object-fit: cover;   
+}
+
+.main_pic {
+    position: relative;
+    z-index: 1; 
+    overflow: hidden;
+}
+
+.main_pic img {
+    opacity: 20%;
+    min-width: 1000px;
+}
+
+.main_pic:hover img {
+    opacity: 100%;
+}
+
+.park_title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the text horizontally and vertically */
+    margin: 0; /* Remove default margin */
+    color: white; /* Set text color */
+    z-index: 2; /* Ensure the text appears above the image */
+    
+    opacity: 1; /* Set initial opacity to fully visible */
+    transition: opacity 0.5s ease; 
+}
+
+picture:hover .park_title {
+    /* color: transparent !important; */
+    opacity: 0 !important; 
+    /* visibility: hidden; */
+    color: red;
+}
+
+.pics {
+    flex-wrap: wrap;
+    display: flex;
+    gap: 10px;
+}
+
+.pic_small {
+    width: 400px;
+    height: 250px;
+    overflow: hidden;
+}
+
+.pic_small img {
+    min-width: 400px;
+    min-height: 250px;
+}
+
+
+
+
