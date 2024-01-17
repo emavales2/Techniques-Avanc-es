@@ -1,0 +1,32 @@
+{
+  "produits": [
+    {
+      "id": 1,
+      "nom": "Produit No. UN",
+      "description": "Description courte du Produit No. 1",
+      "prix": "100.00 CAD",
+      "categorie": "Catégorie A"
+    },
+    {
+      "id": 2,
+      "nom": "Produit No. DEUX",
+      "description": "Description courte du Produit No. 2",
+      "prix": "102.50 CAD",
+      "categorie": "Catégorie B"
+    },
+    {
+      "id": 3,
+      "nom": "Produit No. TROIS",
+      "description": "Description courte du Produit No. 3",
+      "prix": "30.00 CAD",
+      "categorie": "Catégorie C"
+    },
+    {
+      "nom": "Test",
+      "description": "12345 test",
+      "prix": "5.00",
+      "categorie": "Catégorie A",
+      "id": 4
+    }
+  ]
+}
